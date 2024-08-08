@@ -1,4 +1,5 @@
 ﻿import AccountManager = require('@cloudscapelabs/code-push');
+import RequestManager = require('@cloudscapelabs/code-push/utils/request-manager');
 import chalk from 'chalk';
 import childProcess from 'child_process';
 import debugCommand from './commands/debug';
@@ -129,25 +130,27 @@ function accessKeyPatch(command: cli.IAccessKeyPatchCommand): Promise<void> {
         throw new Error('A new name and/or TTL must be provided.');
     }
 
-    return sdk
-        .patchAccessKey(command.oldName, command.newName, command.ttl)
-        .then((accessKey: AccessKey) => {
-            let logMessage: string = 'Successfully ';
-            if (willUpdateName) {
-                logMessage += `renamed the access key "${command.oldName}" to "${command.newName}"`;
-            }
+    throw new Error('Not supported')
 
-            if (willUpdateTtl) {
-                const expirationDate = moment(accessKey.expires).format('LLLL');
-                if (willUpdateName) {
-                    logMessage += ` and changed its expiration date to ${expirationDate}`;
-                } else {
-                    logMessage += `changed the expiration date of the "${command.oldName}" access key to ${expirationDate}`;
-                }
-            }
+    // return sdk
+    //     .patchAccessKey(command.oldName, command.newName, command.ttl)
+    //     .then((accessKey: AccessKey) => {
+    //         let logMessage: string = 'Successfully ';
+    //         if (willUpdateName) {
+    //             logMessage += `renamed the access key "${command.oldName}" to "${command.newName}"`;
+    //         }
 
-            out.text(`${logMessage}.`);
-        });
+    //         if (willUpdateTtl) {
+    //             const expirationDate = moment(accessKey.expires).format('LLLL');
+    //             if (willUpdateName) {
+    //                 logMessage += ` and changed its expiration date to ${expirationDate}`;
+    //             } else {
+    //                 logMessage += `changed the expiration date of the "${command.oldName}" access key to ${expirationDate}`;
+    //             }
+    //         }
+
+    //         out.text(`${logMessage}.`);
+    //     });
 }
 
 function accessKeyList(command: cli.IAccessKeyListCommand): Promise<void> {
@@ -504,7 +507,7 @@ function deploymentHistory(command: cli.IDeploymentHistoryCommand): Promise<void
                     };
                 }
             });
-            printDeploymentHistory(command, <PackageWithMetrics[]>deploymentHistory, account.email);
+            printDeploymentHistory(command, deploymentHistory, account.email);
         },
     );
 }
@@ -693,7 +696,7 @@ function initiateExternalAuthenticationAsync(action: string, serverUrl?: string)
 
         // For "link" there shouldn't be a token prompt, so we go straight to the Mobile Center URL to avoid that
         out.text(message);
-        var url: string = serverUrl || AccountManager.MOBILE_CENTER_SERVER_URL;
+        var url: string = serverUrl || RequestManager.SERVER_URL;
         opener(url);
     } else {
         // We use this now for both login & register
@@ -702,7 +705,7 @@ function initiateExternalAuthenticationAsync(action: string, serverUrl?: string)
         out.text(message);
         var hostname: string = os.hostname();
         var url: string = `${
-            serverUrl || AccountManager.SERVER_URL
+            serverUrl || RequestManager.SERVER_URL
         }/auth/${action}?hostname=${hostname}`;
         opener(url);
     }
@@ -776,20 +779,20 @@ function loginWithExternalAuthentication(
 
 function logout(command: cli.ICommand): Promise<void> {
     return Promise.resolve()
-        .then((): Promise<void> => {
-            if (!connectionInfo.preserveAccessKeyOnLogout) {
-                var machineName: string = os.hostname();
-                return sdk.removeSession(machineName).catch((error: CodePushError) => {
-                    // If we are not authenticated or the session doesn't exist anymore, just swallow the error instead of displaying it
-                    if (
-                        error.statusCode !== AccountManager.ERROR_UNAUTHORIZED &&
-                        error.statusCode !== AccountManager.ERROR_NOT_FOUND
-                    ) {
-                        throw error;
-                    }
-                });
-            }
-        })
+        // .then((): Promise<void> => {
+        //     if (!connectionInfo.preserveAccessKeyOnLogout) {
+        //         var machineName: string = os.hostname();
+        //         return sdk.removeSession(machineName).catch((error: CodePushError) => {
+        //             // If we are not authenticated or the session doesn't exist anymore, just swallow the error instead of displaying it
+        //             if (
+        //                 error.statusCode !== RequestManager.ERROR_UNAUTHORIZED &&
+        //                 error.statusCode !== RequestManager.ERROR_NOT_FOUND
+        //             ) {
+        //                 throw error;
+        //             }
+        //         });
+        //     }
+        // })
         .then((): void => {
             sdk = null;
             deleteConnectionInfoCache();
@@ -835,7 +838,7 @@ function printCollaboratorsList(format: string, collaborators: CollaboratorMap):
     } else if (format === 'table') {
         out.table(
             out.getCommandOutputTableOptions(generateColoredTableTitles(['E-mail Address'])),
-            collaborators.map((email) => [getCollaboratorDisplayName(email, collaborators[email])]),
+            Object.keys(collaborators).map((email) => [getCollaboratorDisplayName(email, collaborators[email])]),
         );
     }
 }
@@ -878,7 +881,7 @@ function printDeploymentList(
 
 function printDeploymentHistory(
     command: cli.IDeploymentHistoryCommand,
-    deploymentHistory: PackageWithMetrics[],
+    deploymentHistory: Package[],
     currentUserEmail: string,
 ): void {
     if (command.format === 'json') {
@@ -892,7 +895,7 @@ function printDeploymentHistory(
         headers.push('Description', 'Install Metrics');
         out.table(
             out.getCommandOutputTableOptions(generateColoredTableTitles(headers)),
-            deploymentHistory.map((packageObject: Package) => {
+            deploymentHistory.map((packageObject) => {
                 var releaseTime: string = formatDate(packageObject.uploadTime);
                 var releaseSource: string;
                 if (packageObject.releaseMethod === 'Promote') {
@@ -1439,11 +1442,11 @@ export var releaseReact = (command: cli.IReleaseReactCommand): Promise<void> => 
     );
 };
 
-function validateDeployment(appName: string, deploymentName: string): Promise<void> {
+function validateDeployment(appName: string, deploymentName: string): Promise<Deployment> {
     return sdk.getDeployment(appName, deploymentName).catch((err: any) => {
         // If we get an error that the deployment doesn't exist (but not the app doesn't exist), then tack on a more descriptive error message telling the user what to do
         if (
-            err.statusCode === AccountManager.ERROR_NOT_FOUND &&
+            err.statusCode === RequestManager.ERROR_NOT_FOUND &&
             err.message.indexOf('Deployment') !== -1
         ) {
             err.message =
@@ -1533,7 +1536,7 @@ function serializeConnectionInfo(
 function releaseErrorHandler(error: CodePushError, command: cli.ICommand): void {
     if (
         (<any>command).noDuplicateReleaseError &&
-        error.statusCode === AccountManager.ERROR_CONFLICT
+        error.statusCode === RequestManager.ERROR_CONFLICT
     ) {
         console.warn(chalk.yellow('[Warning] ' + error.message));
     } else {
@@ -1622,7 +1625,7 @@ function getSdk(
                     maybePromise = maybePromise.catch((error: any) => {
                         if (
                             error.statusCode &&
-                            error.statusCode === AccountManager.ERROR_UNAUTHORIZED
+                            error.statusCode === RequestManager.ERROR_UNAUTHORIZED
                         ) {
                             deleteConnectionInfoCache(/* printMessage */ false);
                         }
