@@ -6,7 +6,7 @@ import path from 'path';
 import rimraf from 'rimraf';
 import { generatePackageHashFromDirectory } from '../lib/hash-utils';
 
-import AccountManager = require('code-push');
+import AccountManager = require('@cloudscapelabs/code-push');
 
 var CURRENT_CLAIM_VERSION: string = '1.0.0';
 var METADATA_FILE_NAME: string = '.codepushrelease';

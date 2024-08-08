@@ -1,7 +1,8 @@
 ﻿import yargs from 'yargs';
 import * as cli from './definitions/cli';
 import chalk from 'chalk';
-import updateNotifier from 'update-notifier';
+// Disabled as latest update requires esm modules to be enabled
+// import updateNotifier from 'update-notifier';
 import parseDuration from 'parse-duration';
 
 import backslash = require('backslash');
@@ -41,10 +42,10 @@ export function showHelp(showRootDescription?: boolean): void {
 }
 
 function updateCheck(): void {
-    var notifier: updateNotifier.IResult = updateNotifier({ pkg: packageJson });
-    if (notifier.update) {
-        notifier.notify();
-    }
+    // var notifier: updateNotifier.IResult = updateNotifier({ pkg: packageJson });
+    // if (notifier.update) {
+    //     notifier.notify();
+    // }
 }
 
 function accessKeyAdd(commandName: string, yargs: yargs.Argv): void {

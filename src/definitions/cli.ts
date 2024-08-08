@@ -1,4 +1,4 @@
-﻿import AccountManager = require('code-push');
+﻿import AccountManager = require('@cloudscapelabs/code-push');
 
 export enum CommandType {
     accessKeyAdd,

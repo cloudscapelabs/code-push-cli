@@ -4,14 +4,14 @@ import recursiveFs from 'recursive-fs';
 import slash from 'slash';
 import yazl from 'yazl';
 
-import { Package, PackageInfo } from 'code-push/script/types';
+import { Package, PackageInfo } from '@cloudscapelabs/code-push/script/types';
 import { out } from '../util/interaction';
 import { generateRandomFilename } from '../lib/file-utils';
 import * as cli from '../definitions/cli';
 
 const progress = require('progress');
 
-import AccountManager = require('code-push');
+import AccountManager = require('@cloudscapelabs/code-push');
 
 var coreReleaseHook: cli.ReleaseHook = (
     currentCommand: cli.IReleaseCommand,

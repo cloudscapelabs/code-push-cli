@@ -1,4 +1,4 @@
-﻿import AccountManager = require('code-push');
+﻿import AccountManager = require('@cloudscapelabs/code-push');
 import chalk from 'chalk';
 import childProcess from 'child_process';
 import debugCommand from './commands/debug';
@@ -28,7 +28,7 @@ import {
     Package,
     PackageInfo,
     UpdateMetrics,
-} from 'code-push/script/types';
+} from '@cloudscapelabs/code-push/script/types';
 import {
     getHermesEnabled,
     getiOSHermesEnabled,
