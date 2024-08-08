@@ -13,10 +13,7 @@
   "files": [
     "bin/"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cloudscapelabs/code-push-cl.git"
-  },
+  "repository": "https://github.com/cloudscapelabs/code-push-cli",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
