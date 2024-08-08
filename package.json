@@ -1,6 +1,6 @@
 {
   "name": "@cloudscapelabs/code-push-cli",
-  "version": "2.6.6",
+  "version": "2.6.7",
   "description": "Management CLI for the CodePush service",
   "main": "bin/cli.js",
   "scripts": {
