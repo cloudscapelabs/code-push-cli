@@ -130,27 +130,25 @@ function accessKeyPatch(command: cli.IAccessKeyPatchCommand): Promise<void> {
         throw new Error('A new name and/or TTL must be provided.');
     }
 
-    throw new Error('Not supported')
+    return sdk
+        .patchAccessKey(command.oldName, command.newName, command.ttl)
+        .then((accessKey: AccessKey) => {
+            let logMessage: string = 'Successfully ';
+            if (willUpdateName) {
+                logMessage += `renamed the access key "${command.oldName}" to "${command.newName}"`;
+            }
 
-    // return sdk
-    //     .patchAccessKey(command.oldName, command.newName, command.ttl)
-    //     .then((accessKey: AccessKey) => {
-    //         let logMessage: string = 'Successfully ';
-    //         if (willUpdateName) {
-    //             logMessage += `renamed the access key "${command.oldName}" to "${command.newName}"`;
-    //         }
+            if (willUpdateTtl) {
+                const expirationDate = moment(accessKey.expires).format('LLLL');
+                if (willUpdateName) {
+                    logMessage += ` and changed its expiration date to ${expirationDate}`;
+                } else {
+                    logMessage += `changed the expiration date of the "${command.oldName}" access key to ${expirationDate}`;
+                }
+            }
 
-    //         if (willUpdateTtl) {
-    //             const expirationDate = moment(accessKey.expires).format('LLLL');
-    //             if (willUpdateName) {
-    //                 logMessage += ` and changed its expiration date to ${expirationDate}`;
-    //             } else {
-    //                 logMessage += `changed the expiration date of the "${command.oldName}" access key to ${expirationDate}`;
-    //             }
-    //         }
-
-    //         out.text(`${logMessage}.`);
-    //     });
+            out.text(`${logMessage}.`);
+        });
 }
 
 function accessKeyList(command: cli.IAccessKeyListCommand): Promise<void> {
@@ -779,20 +777,20 @@ function loginWithExternalAuthentication(
 
 function logout(command: cli.ICommand): Promise<void> {
     return Promise.resolve()
-        // .then((): Promise<void> => {
-        //     if (!connectionInfo.preserveAccessKeyOnLogout) {
-        //         var machineName: string = os.hostname();
-        //         return sdk.removeSession(machineName).catch((error: CodePushError) => {
-        //             // If we are not authenticated or the session doesn't exist anymore, just swallow the error instead of displaying it
-        //             if (
-        //                 error.statusCode !== RequestManager.ERROR_UNAUTHORIZED &&
-        //                 error.statusCode !== RequestManager.ERROR_NOT_FOUND
-        //             ) {
-        //                 throw error;
-        //             }
-        //         });
-        //     }
-        // })
+        .then((): Promise<void> => {
+            if (!connectionInfo.preserveAccessKeyOnLogout) {
+                var machineName: string = os.hostname();
+                return sdk.removeSession(machineName).catch((error: CodePushError) => {
+                    // If we are not authenticated or the session doesn't exist anymore, just swallow the error instead of displaying it
+                    if (
+                        error.statusCode !== RequestManager.ERROR_UNAUTHORIZED &&
+                        error.statusCode !== RequestManager.ERROR_NOT_FOUND
+                    ) {
+                        throw error;
+                    }
+                });
+            }
+        })
         .then((): void => {
             sdk = null;
             deleteConnectionInfoCache();

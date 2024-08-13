@@ -28,7 +28,7 @@
   "author": "cloudscapelabs",
   "license": "MIT",
   "dependencies": {
-    "@cloudscapelabs/code-push": "4.2.1-csl1",
+    "@cloudscapelabs/code-push": "^4.2.1-csl3",
     "backslash": "0.2.0",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
