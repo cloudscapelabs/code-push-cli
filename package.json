@@ -1,6 +1,6 @@
 {
   "name": "@cloudscapelabs/code-push-cli",
-  "version": "2.6.5-csl1",
+  "version": "2.6.5-csl2",
   "description": "Management CLI for the CodePush service",
   "main": "bin/cli.js",
   "scripts": {
@@ -38,7 +38,7 @@
     "mkdirp": "1.0.4",
     "moment": "2.29.4",
     "opener": "1.5.2",
-    "parse-duration": "1.0.2",
+    "parse-duration": "^2.1.4",
     "plist": "3.0.5",
     "progress": "2.0.3",
     "prompt": "1.3.0",
